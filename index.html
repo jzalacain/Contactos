@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+<script type="text/javascript" src="cordova.js" charset="utf-8"></script>
+
+<script type="text/javascript" >
+var valorDesplegable;
+function cargar() {
+// 	alert("cargar");
+	document.addEventListener("deviceready", onDeviceready, false);
+}
+function onDeviceready(){
+// 	alert("onDevice");
+}
+function buscar(){
+	var valorFiltro=prompt("Introduce una organización");
+	valorDesplegable= f1.desplegable.value;
+	
+	var miFiltro= new ContactFindOptions();
+	miFiltro.filter=valorFiltro;
+	miFiltro.multiple=true;
+
+	if (valorDesplegable=="organizations"){
+		AtributosPhoneGap=[valorDesplegable];		
+	}
+	
+	if(valorDesplegable=="nickname"){
+		AtributosPhoneGap=[valorDesplegable,"phoneNumbers"];
+	}
+	
+	if(valorDesplegable=="*"){
+		AtributosPhoneGap=[valorDesplegable];
+	}
+	//LLamada al metodo para filtrar en la agenda
+   //navigator.contacts.find(AtributosPhoneGapDeBusqueda,metodoOnsuccess,metodoOnerror,ObjetoContactFindOptions)
+	navigator.contacts.find(AtributosPhoneGap, contacta,error,miFiltro);
+}
+function contacta(contactos) {
+//  	alert("Entra contacta");
+	var cadena="Listado de contactos filtrados <br />";
+	if(valorDesplegable=="organizations"){
+		for(var recorreContactos=0;recorreContactos<contactos.length;recorreContactos++){
+			cadena+= "<br />Nombre: " + contactos[recorreContactos].displayName +
+			"<br />Organización:"+ contactos[recorreContactos].organizations[0].name +
+			"<br />Cargo: "+contactos[recorreContactos].organizations[0].title;	
+		}	
+	}else if(valorDesplegable=="nickname"){
+		for(var recorreContactos=0;recorreContactos<contactos.length;recorreContactos++){
+			cadena+= "<br />Nombre:"+ contactos[recorreContactos].displayName ;
+			//El atributo phoneNumbers de Contact es una vector con todos los números almacenados
+			for(var recorreTelefonos=0;recorreTelefonos<contactos[recorreContactos].phoneNumbers.length;recorreTelefonos++){
+				cadena+="<br />Tipo:"+contactos[recorreContactos].phoneNumbers[recorreTelefonos].type +
+						"<br />Numero de Teléfono: "+contactos[recorreContactos].phoneNumbers[recorreTelefonos].value;
+			}
+			cadena +="<br />";
+		}
+	}else{
+		for(var recorreContactos=0;recorreContactos<contactos.length;recorreContactos++){
+			cadena+="<br />Nombre: "+ contactos[recorreContactos].displayName;
+			for(var recorreEmails=0;recorreEmails<contactos[recorreContactos].emails.length;recorreEmails++){
+				cadena+="<br />Tipo: "+ contactos[recorreContactos].emails[recorreEmails].type +
+					"<br />Dirección Correo Electronico: "+ contactos[recorreContactos].emails[recorreEmails].value;	
+			}
+			cadena+="<br />Organización:"+ contactos[recorreContactos].organizations[0].name ;
+			cadena+="<br />";
+		}
+	}
+	document.getElementById("resultado").innerHTML=cadena;
+
+}
+function error(contactoError) {
+	alert("Fallo por: " +contactoError);
+}
+</script>
+</head>
+<body onload="cargar()">
+<h1>Buscando Contactos</h1>
+<div id="resultado"></div>
+<div id="desplegable">
+	<form id="f1">
+		<select id="desplegable">
+			<option value="organizations">Compañia</option>
+			<option value="nickname">Sobrenombre</option>
+			<option value="*">Todos</option>
+		</select>
+		<input type="button" value="Buscar" onclick="buscar()"/>
+	</form>
+</div>
+</body>
+</html>
